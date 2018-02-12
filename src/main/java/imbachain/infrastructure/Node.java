@@ -9,11 +9,10 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 
+import imbachain.external.UdpClient;
 import imbachain.mining.Miner;
 import imbachain.mining.Miner.Winner;
 import imbachain.utils.CryptoUtils;
@@ -32,7 +31,8 @@ public class Node extends BaseNode implements NodeInterface {
 		super(address, port);
 	}
 
-	
+	@Autowired
+	private UdpClient udpClient;
 	
 	private Queue<Transaction> transactionsQueue = new PriorityQueue<Transaction>();
 	private List<Block> blockchain = new LinkedList<>(Arrays.asList(new GenesisBlock()));
@@ -59,7 +59,7 @@ public class Node extends BaseNode implements NodeInterface {
 		UnconfirmedBlock newBlock = new UnconfirmedBlock(blockIndex, blockchain.get(blockIndex - 1).getHash(),
 				blockTransactions, DEFAULT_DIFFICULTY);
 
-		Miner miner = new Miner(newBlock, 0, DEFAULT_DIFFICULTY);
+		miner = new Miner(newBlock, 0, DEFAULT_DIFFICULTY);
 		Winner winner = miner.mine();
 		if (winner != null) {
 			Block confirmedBlock = Block.confirmBlock(newBlock, winner.getTimestamp(), winner.getNonce());
@@ -103,10 +103,7 @@ public class Node extends BaseNode implements NodeInterface {
 		return true;
 	}
 
-	@Scheduled(fixedDelay = 5000)
-	public void checkPeersBlockchain() {
-		System.out.println("Synchronizing chain if it is too old:" + System.currentTimeMillis());
-	}
+	
 
 	// NODE API starts here
 	// -------------------------------------------------------------
@@ -153,6 +150,13 @@ public class Node extends BaseNode implements NodeInterface {
 			return true;
 		}
 		return false;
+	}
+
+	
+	//--------------- UDP Requests ---------
+	@Override
+	public void handleUdpMessage(String string) {
+		System.out.println("Received UDP: "+string);
 	}
 
 

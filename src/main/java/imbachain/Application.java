@@ -10,9 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.config.EnableIntegration;
+import org.springframework.integration.ip.udp.UnicastReceivingChannelAdapter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import imbachain.infrastructure.BaseNode;
@@ -21,6 +20,7 @@ import imbachain.infrastructure.NodeInterface;
 
 @SpringBootApplication
 @EnableScheduling
+@EnableIntegration
 public class Application {
 
 	private static int port = BaseNode.DEFAULT_PORT;
@@ -63,6 +63,14 @@ public class Application {
 		return new Node(address,name, port);
 	}
 	
+	 @Bean
+	 public UnicastReceivingChannelAdapter inbound() {
+	        UnicastReceivingChannelAdapter adapter = new UnicastReceivingChannelAdapter(5555);
+	        adapter.setOutputChannelName("udp-channel");
+	        return adapter;
+	  }
+
+
 
 
 }

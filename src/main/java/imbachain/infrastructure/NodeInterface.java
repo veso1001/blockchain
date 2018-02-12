@@ -18,4 +18,6 @@ public interface NodeInterface {
 
 	boolean addBlock(Block newBlock);
 
+	void handleUdpMessage(String string);
+
 }
